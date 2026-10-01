@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Gemini Style — Biblioteca de Comandos Bíblicos</title>
+<meta name="description" content="Biblical Content Engine: códigos reutilizáveis para estudo, imagens, vídeos, shorts, reels e devocionais bíblicos, otimizados para o Gemini."/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c9a45c'/%3E%3Cpath d='M16 6v20M9 12h14' stroke='%23090a0d' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"/>
+<link rel="stylesheet" href="gemini/style.css"/>
+</head>
+<body>
+<header class="top">
+  <button class="icon-btn" id="menuBtn" aria-label="Abrir menu" data-act="toggle-menu">☰</button>
+  <a class="brand" href="gemini-style.html">Gemini <b>Style</b><small>Biblical Prompt Style</small></a>
+  <label class="search" aria-label="Buscar códigos">
+    <span aria-hidden="true">⌕</span>
+    <input id="search" type="search" autocomplete="off" placeholder="Busque por palavra: mapa, vídeo, oração, thumbnail…"/>
+    <kbd>/</kbd>
+  </label>
+  <a class="small ghost hub-link" href="index.html">← PromptStyle Hub</a>
+  <button class="small primary builder-toggle" id="builderBtn" data-act="toggle-builder">Prompt <span id="selCount">0</span></button>
+</header>
+
+<div class="layout">
+  <nav class="side" id="side" aria-label="Categorias"></nav>
+  <main class="main" id="main" tabindex="-1"></main>
+  <aside class="builder" id="builder" aria-label="Construtor de prompt">
+    <div class="b-head">
+      <h2>Construtor</h2>
+      <span class="status" id="status">PRONTO</span>
+      <button class="icon-btn close-builder" data-act="toggle-builder" aria-label="Fechar">✕</button>
+    </div>
+    <div class="b-body">
+      <label class="lbl" for="ref">Passagem, personagem ou tema</label>
+      <input id="ref" class="field" placeholder="Ex.: Lucas 15:11-32  (aceita: Davi /cinematic /9:16)"/>
+      <div class="lbl">Códigos selecionados</div>
+      <div class="chips" id="chips"></div>
+      <div class="lbl">Combine com</div>
+      <div class="chips suggest" id="suggest"></div>
+      <div class="row2">
+        <label class="lbl" for="target">Alvo Gemini
+          <select id="target" class="field">
+            <option value="auto">Automático</option>
+            <option value="texto">Gemini · texto</option>
+            <option value="imagem">Gemini · imagem</option>
+            <option value="video">Veo · vídeo</option>
+            <option value="none">Sem alvo</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="rules" checked/> Regras de fidelidade e imagem</label>
+      </div>
+      <div class="lbl">Prompt final</div>
+      <pre class="out" id="out">Selecione códigos para gerar o prompt.</pre>
+      <div class="b-actions">
+        <button class="small primary" data-act="copy-prompt">Copiar prompt</button>
+        <button class="small" data-act="copy-line">Copiar códigos</button>
+        <button class="small" data-act="save-combo">Salvar combinação</button>
+        <button class="small ghost" data-act="clear">Limpar</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" hidden>
+  <form class="modal-box" id="comboForm">
+    <h3 id="mTitle">Nova combinação</h3>
+    <label class="lbl" for="cName">Nome</label>
+    <input id="cName" class="field" required maxlength="60"/>
+    <label class="lbl" for="cCat">Categoria</label>
+    <input id="cCat" class="field" maxlength="30" value="Minhas"/>
+    <label class="lbl" for="cDesc">Descrição</label>
+    <input id="cDesc" class="field" maxlength="140"/>
+    <label class="lbl" for="cCodes">Códigos (separados por espaço)</label>
+    <input id="cCodes" class="field" required placeholder="/context /reflection /cinematic /9:16"/>
+    <p class="hint" id="cErr" role="alert"></p>
+    <div class="b-actions">
+      <button type="submit" class="small primary">Salvar</button>
+      <button type="button" class="small ghost" data-act="close-modal">Cancelar</button>
+    </div>
+  </form>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="gemini/data.js"></script>
+<script src="gemini/engine.js"></script>
+<script src="gemini/illus.js"></script>
+<script src="gemini/app.js"></script>
+</body>
+</html>
