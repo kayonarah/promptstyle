@@ -1,19 +1,20 @@
-/* Gemini Style — interface. Sem handlers inline: delegação via data-act. */
+/* Interface compartilhada (PromptStyle e Gemini Style). A biblioteca ativa vem de window.GS_LIB.
+   Sem handlers inline: delegação via data-act. */
 (function () {
   'use strict';
-  const D = window.GS_DATA, G = window.GS;
+  const L = window.GS_LIB, D = L.D, G = L.G, UI = L.ui, CR = UI.creator || {};
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const attr = esc;
 
   /* ---------- Persistência segura ---------- */
   const store = {
-    get(k, d) { try { const v = localStorage.getItem('gs.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-    set(k, v) { try { localStorage.setItem('gs.' + k, JSON.stringify(v)); } catch (e) { /* ignora */ } }
+    get(k, d) { try { const v = localStorage.getItem('gs.' + L.id + '.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('gs.' + L.id + '.' + k, JSON.stringify(v)); } catch (e) { /* ignora */ } }
   };
 
   const S = {
-    view: store.get('view', 'estudo'),
+    view: store.get('view', UI.defaultView),
     q: '',
     ref: store.get('ref', ''),
     sel: G.normalize((store.get('sel', []) || []).filter(c => D.byCode[c])),
@@ -53,6 +54,7 @@
   const toggle = (arr, v) => { const i = arr.indexOf(v); i < 0 ? arr.push(v) : arr.splice(i, 1); };
   const line = () => (S.ref ? S.ref + ' ' : '') + S.sel.join(' ');
   const promptText = () => G.compose({ ref: S.ref, codes: S.sel }, { rules: S.rules, target: S.target });
+  const featured = new Set(D.CODES.filter(c => c.featured).map(c => c.code));
 
   /* ---------- Componentes ---------- */
   function codeCard(c) {
@@ -113,13 +115,14 @@
     const fq = G.fold(S.q);
     const combos = allCombos().filter(c => G.fold(c.name + ' ' + (c.description || '') + ' ' + c.codes.join(' ')).includes(fq));
     return hero('Busca inteligente', `Resultados para “${esc(S.q)}”`, `${codes.length} códigos e ${combos.length} combinações.`) +
-      `<div class="sec"><h2>Códigos</h2></div>` + grid(codes, codeCard, 'Nenhum código encontrado. Tente “mapa”, “vídeo”, “oração” ou “mistério”.') +
+      `<div class="sec"><h2>Códigos</h2></div>` + grid(codes, codeCard, (UI.searchEmpty || 'Nenhum código encontrado. Tente outro termo.')) +
       (combos.length ? `<div class="sec"><h2>Combinações</h2></div>` + grid(combos, comboCard, '') : '');
   }
   function renderCombos(list, withNew) {
     const cats = ['Todas'].concat(Array.from(new Set(list.map(c => c.category))));
     const shown = list.filter(c => S.comboCat === 'Todas' || c.category === S.comboCat);
-    return hero('Combinações', '⚡ Combinações prontas', 'Receitas pré-configuradas e as suas próprias. Duplique qualquer uma para personalizar.') +
+    const ch = UI.combosHero || { title: '⚡ Combinações prontas', sub: 'Receitas pré-configuradas e as suas próprias. Duplique qualquer uma para personalizar.' };
+    return hero('Combinações', ch.title, ch.sub) +
       `<div class="sec"><div class="filters">${cats.map(k => `<button class="chip${k === S.comboCat ? ' on' : ''}" data-act="combo-cat" data-cat="${attr(k)}">${esc(k)}</button>`).join('')}</div>
       ${withNew ? '<button class="small primary" data-act="new-combo">+ Nova combinação</button>' : ''}</div>` + grid(shown, comboCard, 'Nenhuma combinação.');
   }
@@ -133,24 +136,24 @@
   }
   function renderCreator() {
     const g = S.guided, G2 = G.GUIDED;
-    const sel = (k, label) => `<label class="lbl" for="g-${k}">${label}<select class="field" id="g-${k}" data-guided="${k}"><option value="">—</option>${Object.keys(G2[k]).map(o => `<option${g[k] === o ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select></label>`;
+    const sel = m => `<label class="lbl" for="g-${m.key}">${esc(m.label)}<select class="field" id="g-${m.key}" data-guided="${m.key}"><option value="">—</option>${Object.keys(G2[m.key]).map(o => `<option${g[m.key] === o ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select></label>`;
     const codes = G.guided(g);
-    return hero('Biblical Content Engine', '🧩 Criador de Prompt', 'De uma simples passagem a estudo, cena, short, reels, documentário, mapa, sermão, thumbnail e mais.') +
-      `<section class="panel"><h3>✨ Criar para mim</h3><p class="hint">Descreva o que você quer. Ex.: “Quero um Reels sobre Daniel na cova dos leões.”</p>
-        <textarea class="field" id="forMe" placeholder="Quero um Reels sobre Daniel na cova dos leões."></textarea>
+    return hero(esc(CR.eyebrow), esc(CR.title), esc(CR.sub)) +
+      `<section class="panel"><h3>${esc(CR.forMeTitle)}</h3><p class="hint">${esc(CR.forMeHint)}</p>
+        <textarea class="field" id="forMe" placeholder="${attr(CR.forMePlaceholder)}"></textarea>
         <div class="b-actions"><button class="small primary" data-act="for-me">CRIAR PARA MIM</button></div></section>
-       <section class="panel"><h3>Construtor de Prompt Bíblico</h3><p class="hint">Escolha as opções e receba a sequência de códigos recomendada. Estilo e formato só entram em objetivos visuais (imagem, vídeo, thumbnail…).</p>
-        <div class="grid-sel">${sel('fonte', '1. Fonte')}${sel('objetivo', '2. Objetivo')}${sel('tipo', '3. Tipo de conteúdo')}${sel('estilo', '4. Estilo visual')}${sel('formato', '5. Formato')}</div>
-        <div class="lbl">Sequência recomendada</div><div class="chips">${codes.length ? codes.map(c => `<span class="pill">${esc(c)}</span>`).join('') : '<span class="none">Selecione ao menos um objetivo.</span>'}</div>
+       <section class="panel"><h3>${esc(CR.guidedTitle)}</h3><p class="hint">${esc(CR.guidedHint)}</p>
+        <div class="grid-sel">${G.GUIDED_META.map(sel).join('')}</div>
+        <div class="lbl">Sequência recomendada</div><div class="chips">${codes.length ? codes.map(c => `<span class="pill">${esc(c)}</span>`).join('') : '<span class="none">Selecione ao menos uma opção.</span>'}</div>
         <div class="b-actions"><button class="small primary" data-act="apply-guided"${codes.length ? '' : ' disabled'}>Aplicar ao construtor</button></div></section>
-       <section class="panel"><h3>Do Êxodo 14 a todos os formatos</h3><p class="hint">Uma passagem, vários resultados. Clique para aplicar ao construtor.</p>
-        <div class="codes">${['/deepstudy', '/cinematic', '/fullshort', '/reels', '/documentary', '/map', '/timeline', '/sermon', '/devotional', '/thumbnail', '/imageprompt', '/videoprompt', '/voiceprompt'].map(c => `<button data-act="quick-one" data-code="${c}">${c}</button>`).join('')}</div></section>`;
+       <section class="panel"><h3>${esc(CR.quickTitle)}</h3><p class="hint">${esc(CR.quickHint)}</p>
+        <div class="codes">${(CR.quick || []).map(c => `<button data-act="quick-one" data-code="${attr(c)}">${esc(c)}</button>`).join('')}</div></section>`;
   }
 
   /* ---------- Barra lateral e construtor ---------- */
   function renderSide() {
     let lastGroup = '';
-    $('#side').innerHTML = '<h4>Biblical Prompt Style</h4>' + D.VIEWS.map(v => {
+    $('#side').innerHTML = `<h4>${esc(UI.sideTitle || '')}</h4>` + D.VIEWS.map(v => {
       const n = v.special ? '' : viewCodes(v.id).length;
       const head = v.group !== lastGroup ? `<h5>${esc(v.group)}</h5>` : '';
       lastGroup = v.group;
@@ -160,21 +163,27 @@
   function renderBuilder() {
     $('#selCount').textContent = S.sel.length;
     $('#ref').value !== S.ref && ($('#ref').value = S.ref);
+    $('#refLabel').textContent = UI.refLabel; $('#ref').placeholder = UI.refPlaceholder;
+    $('#optsRow').hidden = !(UI.features.rules || UI.features.target);
+    $('#targetWrap').hidden = !UI.features.target; $('#rulesWrap').hidden = !UI.features.rules;
+    $('#completeBtn').hidden = !UI.features.complete;
     $('#target').value = S.target; $('#rules').checked = S.rules;
     $('#chips').innerHTML = S.sel.length ? S.sel.map(c => `<span class="pill">${esc(c)}<button data-act="remove" data-code="${attr(c)}" aria-label="Remover ${attr(c)}">×</button></span>`).join('') : '<span class="none">Adicione códigos pelos cards ou digite acima.</span>';
     const sug = G.recommend(S.sel, 7);
     $('#suggest').innerHTML = sug.map(c => `<button class="chip" data-act="add" data-code="${attr(c)}">+ ${esc(c)}</button>`).join('');
     $('#out').textContent = S.sel.length ? promptText() : 'Selecione códigos para gerar o prompt.';
-    $('#status').textContent = S.sel.length ? (S.ref.trim() ? 'PRONTO' : 'SEM PASSAGEM') : 'VAZIO';
-    $('#status').classList.toggle('bad', S.sel.length > 0 && !S.ref.trim());
+    const noRef = UI.needsRef && S.sel.length > 0 && !S.ref.trim();
+    $('#status').textContent = S.sel.length ? (noRef ? 'SEM PASSAGEM' : 'VALIDADO') : 'VAZIO';
+    $('#status').classList.toggle('bad', noRef);
   }
   function render() { renderSide(); renderMain(); renderBuilder(); persist(); }
 
   /* ---------- Ações ---------- */
   function addCode(c) {
     const r = G.add(S.sel, c);
+    if (r.conflict) return toast('Estes códigos possuem instruções conflitantes.');
     if (r.list === S.sel) return;
-    if (r.replaced) toast(`Formato ${r.replaced} substituído por ${c}`);
+    if (r.replaced) toast(`Substituído ${r.replaced} por ${c}`);
     S.sel = r.list; render();
   }
   function applyCodes(codes, ref) {
@@ -232,11 +241,18 @@
       const t = $('#forMe').value.trim(); if (!t) return toast('Descreva o que você quer criar');
       const r = G.createForMe(t);
       applyCodes(r.codes, r.ref);
-      toast(r.recognized ? `Identificado: ${r.why}` : 'Formato não reconhecido — usei um estudo padrão');
+      toast(r.recognized ? `Identificado: ${r.why}` : r.why);
       document.body.classList.add('builder-open');
     },
     'apply-guided'() { applyCodes(G.guided(S.guided)); toast('Sequência aplicada ao construtor'); document.body.classList.add('builder-open'); },
-    'quick-one'(el) { applyCodes([el.dataset.code], S.ref || 'Êxodo 14'); document.body.classList.add('builder-open'); }
+    'quick-one'(el) { applyCodes([el.dataset.code], S.ref || CR.quickRef || ''); document.body.classList.add('builder-open'); },
+    complete() {
+      if (!G.complete) return;
+      if (!S.sel.length) return toast('Adicione ao menos um código.');
+      const r = G.complete(S.sel);
+      if (r) { applyCodes(r.codes); toast('Combinação pré-validada encontrada: ' + r.name); }
+      else toast('Não há receita pré-calculada para essa seleção. Use os complementos sugeridos.');
+    }
   };
 
   document.addEventListener('click', e => {
@@ -278,8 +294,11 @@
   $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeModal(); document.body.classList.remove('menu-open', 'builder-open'); }
-    if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) { e.preventDefault(); $('#search').focus(); }
+    if ((e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k')) { e.preventDefault(); $('#search').focus(); }
   });
 
+  /* Alternador de bibliotecas e textos da página */
+  $('#libs').innerHTML = (UI.libs || []).map(l => `<a class="lib${l.id === L.id ? ' on' : ''}" href="${attr(l.href)}"${l.id === L.id ? ' aria-current="page"' : ''}>${esc(l.label)}</a>`).join('');
+  $('#search').placeholder = UI.searchPlaceholder || 'Buscar…';
   render();
 })();

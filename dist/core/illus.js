@@ -77,7 +77,11 @@
     mail: '<rect x="5" y="10" width="38" height="28" rx="3"/><path d="M5 14l19 14 19-14"/>',
     subtitle: '<rect x="5" y="9" width="38" height="30" rx="4"/><path d="M12 28h10M26 28h10M12 34h6M22 34h14"/>',
     letters: '<path d="M8 12h14M15 12v20M8 32h14M28 38l8-26 8 26M31 30h10"/>',
-    cross: '<path d="M20 6h8v12h12v8H28v16h-8V26H8v-8h12z"/>'
+    cross: '<path d="M20 6h8v12h12v8H28v16h-8V26H8v-8h12z"/>',
+    cube: '<path d="M24 5l16 9v20l-16 9-16-9V14z"/><path d="M8 14l16 9 16-9M24 23v20"/>',
+    square: '<rect x="7" y="7" width="34" height="34" rx="4"/><path d="M7 7l34 34"/>',
+    tag: '<path d="M6 24V8h16l20 20-16 16z"/><circle cx="15" cy="17" r="2.5"/>',
+    cart: '<path d="M4 8h7l5 22h24l4-16H13"/><circle cx="20" cy="39" r="3"/><circle cx="36" cy="39" r="3"/>'
   };
 
   /* Código → motivo */
@@ -170,15 +174,15 @@
   });
   const KIND_MOTIF = { study: 'book', text: 'lines', scene: 'camera', layout: 'poster', style: 'palette', platform: 'phone', fmt: 'frame', voice: 'mic', full: 'play', meta: 'film', mod: 'lines' };
 
-  const motifFor = c => CODE_MOTIF[c.code] || KIND_MOTIF[c.kind] || 'book';
+  const motifFor = c => c.motif || CODE_MOTIF[c.code] || KIND_MOTIF[c.kind] || 'book';
 
   /* Rótulo curto "saída" sob o motivo, por tipo de código */
   const KIND_LABEL = { study: 'análise', text: 'texto', scene: 'cena', layout: 'peça', style: 'estilo', platform: 'formato', fmt: 'proporção', voice: 'voz', full: 'pacote', meta: 'prompt', mod: 'ajuste' };
 
   function illus(c) {
     const m = M[motifFor(c)] || M.book;
-    const label = (KIND_LABEL[c.kind] || '').toUpperCase();
-    return '<svg class="illus" viewBox="0 0 160 70" role="img" aria-label="Ilustração: ' + c.code + ' transforma a passagem em ' + (KIND_LABEL[c.kind] || 'resultado') + '" focusable="false">' +
+    const label = (c.illusLabel || KIND_LABEL[c.kind] || '').toUpperCase();
+    return '<svg class="illus" viewBox="0 0 160 70" role="img" aria-label="Ilustração: ' + c.code + ' transforma a passagem em ' + (c.illusLabel || KIND_LABEL[c.kind] || 'resultado') + '" focusable="false">' +
       '<g class="il-doc"><rect x="8" y="9" width="36" height="46" rx="4"/><path d="M15 21h22M15 29h22M15 37h14"/></g>' +
       '<g class="il-arrow"><path d="M52 32h30"/><path d="M76 26l6 6-6 6"/></g>' +
       '<g class="il-out" transform="translate(92 6) scale(1.0)">' + m + '</g>' +

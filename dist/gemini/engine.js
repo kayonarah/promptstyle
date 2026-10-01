@@ -281,7 +281,27 @@
     return normalize(uniq(codes));
   }
 
-  const api = { PLACEHOLDER, fold, parseInput, add, normalize, compose, search, recommend, createForMe, guided, GUIDED, isFmt };
+  const GUIDED_META = [{ key: 'fonte', label: '1. Fonte' }, { key: 'objetivo', label: '2. Objetivo' }, { key: 'tipo', label: '3. Tipo de conteúdo' }, { key: 'estilo', label: '4. Estilo visual' }, { key: 'formato', label: '5. Formato' }];
+  const api = { GUIDED_META, PLACEHOLDER, fold, parseInput, add, normalize, compose, search, recommend, createForMe, guided, GUIDED, isFmt };
   g.GS = api;
+  g.GS_LIB = {
+    id: 'gemini', D, G: api,
+    ui: {
+      sideTitle: 'Biblical Prompt Style', defaultView: 'estudo', needsRef: true,
+      refLabel: 'Passagem, personagem ou tema', refPlaceholder: 'Ex.: Lucas 15:11-32  (aceita: Davi /cinematic /9:16)',
+      searchPlaceholder: 'Busque por palavra: mapa, vídeo, oração, thumbnail…',
+      searchEmpty: 'Nenhum código encontrado. Tente “mapa”, “vídeo”, “oração” ou “mistério”.',
+      features: { rules: true, target: true, complete: false },
+      creator: {
+        eyebrow: 'Biblical Content Engine', title: '🧩 Criador de Prompt',
+        sub: 'De uma simples passagem a estudo, cena, short, reels, documentário, mapa, sermão, thumbnail e mais.',
+        forMeTitle: '✨ Criar para mim', forMeHint: 'Descreva o que você quer. Ex.: “Quero um Reels sobre Daniel na cova dos leões.”', forMePlaceholder: 'Quero um Reels sobre Daniel na cova dos leões.',
+        guidedTitle: 'Construtor de Prompt Bíblico', guidedHint: 'Escolha as opções e receba a sequência de códigos recomendada. Estilo e formato só entram em objetivos visuais (imagem, vídeo, thumbnail…).',
+        quickTitle: 'Do Êxodo 14 a todos os formatos', quickHint: 'Uma passagem, vários resultados. Clique para aplicar ao construtor.',
+        quick: ['/deepstudy', '/cinematic', '/fullshort', '/reels', '/documentary', '/map', '/timeline', '/sermon', '/devotional', '/thumbnail', '/imageprompt', '/videoprompt', '/voiceprompt'], quickRef: 'Êxodo 14'
+      },
+      libs: [{ href: 'index.html', label: 'PromptStyle', id: 'promptstyle' }, { href: 'gemini-style.html', label: 'Gemini Style', id: 'gemini' }]
+    }
+  };
   if (typeof module !== 'undefined') module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

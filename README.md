@@ -1,29 +1,43 @@
-# PromptStyle Hub
+# PromptStyle
 
-Aplicação estática navegável do PromptStyle Hub: uma biblioteca de presets visuais com Builder determinístico.
+Sistema estático com duas bibliotecas de códigos de prompt no **mesmo modelo** (mesma interface, mesma arquitetura):
+
+| Biblioteca | Página | Conteúdo |
+|---|---|---|
+| **PromptStyle Hub** | `dist/index.html` | 48 presets visuais e 8 receitas validadas (produto, marketplace, marketing, fotografia, infantil…) |
+| **Gemini Style** | `dist/gemini-style.html` | 232 códigos bíblicos em 31 categorias (estudo, imagem, vídeo, narração, sermões…) |
 
 ## Executar
 
-Abra `dist/index.html` no navegador ou publique a pasta `dist` como site estático.
+Abra `dist/index.html` no navegador (ou sirva a pasta `dist` como site estático). Para testar localmente com todos os arquivos relativos: `python -m http.server` dentro de `dist`.
 
-## Motor de composição
+## Arquitetura
 
-- Presets têm `role`, termos de busca e fragmento de prompt.
-- A ordem canônica é determinada pelo papel funcional, portanto a ordem do clique não altera o resultado.
-- Formato, plataforma, marketplace e fundo são exclusivos no Builder.
-- Conflitos de fundo são bloqueados antes de entrar na combinação.
-- “Completar combinação” consulta somente receitas pré-validadas presentes na biblioteca.
+```
+dist/
+  index.html, gemini-style.html   páginas (mesmo HTML; muda só a biblioteca carregada e o tema)
+  core/app.js                     interface compartilhada (menu, cards, construtor, busca, favoritos, combinações próprias)
+  core/illus.js                   ilustrações SVG por código (motivos reutilizáveis)
+  core/style.css                  estilos e temas (violeta = Hub, dourado = Gemini Style)
+  promptstyle/  presets.js        dados originais [code, nome, papel, descrição, palavras-chave, fragmento]
+                data.js           catálogo no formato {code,name,category,description,prompt,tags,compatibleWith,examples,featured}
+                engine.js         motor do Hub: ordem canônica por papel, papéis exclusivos, conflitos de fundo, completar combinação
+  gemini/       data.js, engine.js  catálogo e motor bíblico (parser, composição coerente, regras de fidelidade e imagem)
+```
 
-## Evolução para produção
+Cada `engine.js` expõe `window.GS_LIB = { id, D, G, ui }`; o `core/app.js` só conhece essa interface. Para adicionar uma terceira biblioteca basta criar `data.js` + `engine.js` e uma página nova.
 
-O domínio de dados está estruturado no script como `P` (presets) e `R` (receitas). Em uma implantação full-stack, mova estas coleções para Prisma/PostgreSQL e preserve as funções `canonical`, `valid` e `compose` como serviços de domínio, acionando o gerador em uma tarefa de manutenção.
+### Regras do Hub (preservadas)
+- A ordem canônica é determinada pelo papel funcional; a ordem do clique não altera o resultado.
+- Formato, plataforma, marketplace e fundo são exclusivos (o novo substitui o anterior).
+- Conflitos de fundo (`/whitebg`, `/blackbg`, `/transparent`) são bloqueados.
+- “Completar combinação” consulta somente receitas pré-validadas.
 
-## Gemini Style — Biblical Prompt Style
+### Como expandir
+- **Novo preset do Hub:** uma linha em `promptstyle/presets.js` (e, se preciso, um motivo em `core/illus.js`).
+- **Novo código bíblico / categoria:** uma linha em `gemini/data.js` (`SECTIONS`, `VIEWS`, `COMBOS`).
+- Favoritos e combinações próprias ficam no `localStorage` (separados por biblioteca).
 
-Página `dist/gemini-style.html` (link "✦ Gemini Style" no menu do Hub). Biblioteca de 232 códigos bíblicos reutilizáveis em 31 categorias, cada um com ilustração (`dist/gemini/illus.js`: motivos SVG reutilizáveis), independente dos presets do Hub (nada foi substituído).
+## Publicação
 
-- `dist/gemini/data.js`: catálogo (`SECTIONS`), menu (`VIEWS`), combinações (`COMBOS`, `DARK_COMBOS`) e regras globais. **Para expandir, basta adicionar linhas/itens aqui.** Cada código vira `{code, name, category, description, prompt, tags, compatibleWith, examples, featured}`.
-- `dist/gemini/engine.js`: parser (`Davi /cinematic /9:16`), exclusividade de formato, composição coerente do prompt, busca por tags/sinônimos, recomendação, "Criar para mim" e construtor guiado. Testável em Node (`require`).
-- `dist/gemini/app.js` + `style.css`: interface sem handlers inline; favoritos e combinações próprias (criar/editar/duplicar/excluir) em `localStorage`.
-
-Correções no Hub: `showRecipes()` implementada, presets `/blackbg` e `/transparent` criados (já eram referenciados nos conflitos) e CSP liberando `fonts.googleapis.com`.
+O site é 100% estático. Para a Hostinger, envie o conteúdo de `dist/` para `public_html/promptstyle/`.

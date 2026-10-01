@@ -132,3 +132,21 @@ select.field{padding:9px}
 .il-out{stroke:var(--gold);stroke-width:2}
 .il-lbl{fill:var(--muted)!important;stroke:none!important;font:500 7px 'DM Mono',monospace;letter-spacing:.1em}
 .card:hover .il-out{stroke:var(--gold2)}
+
+/* Alternador de bibliotecas */
+.libs{display:flex;gap:4px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.libs .lib{font-size:12px;font-weight:600;padding:6px 11px;border-radius:7px;color:var(--muted);white-space:nowrap}
+.libs .lib:hover{color:var(--text)}
+.libs .lib.on{background:var(--gold);color:#17120a}
+.hub-link{display:none}
+@media(max-width:820px){.libs{order:4}.libs .lib{padding:5px 9px}}
+
+/* Tema violeta (PromptStyle Hub) — mesmo modelo, outra paleta */
+.theme-violet{--gold:#8b73ff;--gold2:#c4b8ff;background:radial-gradient(900px 500px at 50% -10%,#2b2051 0%,transparent 70%),var(--bg)}
+.theme-violet .libs .lib.on,.theme-violet .small.primary{color:#fff}
+.theme-violet .side button.active,.theme-violet .chip.on,.theme-violet .small.on,.theme-violet .pill{background:#241d46;color:var(--gold2)}
+.theme-violet .code{background:#1d1838}
+.theme-violet .tag{color:#bdb3ff}
+.theme-violet .card:hover{border-color:#7164a9}
+.theme-violet .out,.theme-violet details code{color:#e5e1ff}
+.theme-violet .toast{background:#e9e5ff}
