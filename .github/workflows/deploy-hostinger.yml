@@ -1,0 +1,37 @@
+name: Publicar na Hostinger
+
+# Envia a pasta dist/ para public_html/promptstyle/ via FTP a cada push na main.
+# Requer os segredos FTP_SERVER, FTP_USERNAME e FTP_PASSWORD (Settings > Secrets and variables > Actions).
+# Sem os segredos, o job termina sem publicar.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verificar segredos de FTP
+        if: env.FTP_SERVER == ''
+        run: echo "::warning::Segredos FTP ausentes; nada foi publicado."
+
+      - name: Enviar dist/ por FTP
+        if: env.FTP_SERVER != ''
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./dist/
+          server-dir: ./public_html/promptstyle/
