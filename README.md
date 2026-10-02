@@ -1,5 +1,7 @@
 # PromptStyle
 
+🌐 **Site no ar:** [mpjservice.com/promptstyle](https://mpjservice.com/promptstyle/) · [Gemini Style](https://mpjservice.com/promptstyle/gemini-style.html)
+
 Sistema estático com duas bibliotecas de códigos de prompt no **mesmo modelo** (mesma interface, mesma arquitetura):
 
 | Biblioteca | Página | Conteúdo |
