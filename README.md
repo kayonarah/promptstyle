@@ -41,3 +41,7 @@ Cada `engine.js` expõe `window.GS_LIB = { id, D, G, ui }`; o `core/app.js` só 
 ## Publicação
 
 O site é 100% estático. Para a Hostinger, envie o conteúdo de `dist/` para `public_html/promptstyle/`.
+
+## Autoria e licença
+
+© 2026 [kayonarah](https://github.com/kayonarah). Código aberto para **consulta e compartilhamento com crédito**, licenciado sob [CC BY-ND 4.0](LICENSE): não é permitido publicar versões modificadas. Somente o autor altera este repositório.
