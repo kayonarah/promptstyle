@@ -1,6 +1,6 @@
 name: Publicar na Hostinger
 
-# Envia a pasta dist/ para public_html/promptstyle/ via FTP a cada push na main.
+# Envia a pasta dist/ para promptstyle/ (dentro de public_html, raiz da conta FTP) via FTP a cada push na main.
 # Requer os segredos FTP_SERVER, FTP_USERNAME e FTP_PASSWORD (Settings > Secrets and variables > Actions).
 # Sem os segredos, o job termina sem publicar.
 
@@ -34,4 +34,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
           local-dir: ./dist/
-          server-dir: ./public_html/promptstyle/
+          server-dir: ./promptstyle/
